@@ -37,6 +37,7 @@
                 if($orderBy != null) {
                     $query .= $this->buildOrderByClause($orderBy);
                 }
+
                 $stmt = $this->conn->prepare($query);
                 $stmt->execute();
                 return $stmt->fetchAll();
@@ -46,6 +47,45 @@
             }
         }
 
+        public function selectJoin($tablesNames, $joinCriteria, $where=null, $orderBy=null) {
+
+            try {
+                $query  = "";
+                for ($i = 0; $i < sizeof($tablesNames); $i++) {
+                    if($i == 0) {
+                        $query .= $tablesNames[$i];
+                        continue;
+                    }
+                    $query .= " LEFT JOIN " . $tablesNames[$i];
+                    $query .= " ON " . $joinCriteria[$i-1][0] . " = " . $joinCriteria[$i-1][1];
+                }
+                $query = "SELECT * FROM " . $query;
+                try {
+
+                    // set where clause if present
+                    if($where != null) {
+                        $query .= $this->buildWhereClause($where);
+                    }
+                    
+                    if($orderBy != null) {
+                        $query .= $this->buildOrderByClause($orderBy);
+                    }
+
+                    $stmt = $this->conn->prepare($query);
+                    $stmt->execute();
+                    return $stmt->fetchAll();
+                } catch (Exception $e) {
+                    echo "Error while parsing where clauses";
+                }
+
+                
+            } catch (Exception $e) {
+                echo $e;
+                return null;
+            }
+        }
+
+
         // DESCRIPTION
         // insert a record in a table
         // PARAMETERS 
@@ -54,6 +94,13 @@
         // RETURNS
         // 0 if the insert has been successfull, -1 otherwise
         public function insert($tableName, $what) {
+
+            echo "icoa";
+            if (gettype($what) == "string") {
+                $what = json_decode($what, true);
+            }
+            if (!$what) return false;
+
             $query = "INSERT INTO $tableName";
             $fieldNames    = "";
             $fieldValues   = "";
@@ -64,13 +111,25 @@
                 $fieldValues    .= (strlen($fieldValues) == 0 ? "" : ",") . ($fieldValue == null ? 'NULL' : (is_string($fieldValue) ? "'" . $fieldValue . "'" : $fieldValue));
             }
             $query .= " (" . $fieldNames . ") VALUES (" . $fieldValues . ")";
+
             try {
                 $stmt = $this->conn->prepare($query);
-                $stmt->execute();
-                return 0;
+
+                echo $query;
+                $queryResult = $stmt->execute();
+                
+                if($queryResult) {
+                    $lastIdQuery = "SELECT LAST_INSERT_ID() as LAST_INSERT_ID";
+                    $stmt = $this->conn->prepare($lastIdQuery);
+                    if($stmt->execute()) {
+                        $res = $stmt -> fetchAll()[0];
+                    }
+                    if($res != null) return $res["LAST_INSERT_ID"];
+                    return false;
+                }
+                return true;
             } catch (Exception $e) {
-                echo $e;
-                return -1;
+                return false;
             }
         }
 
@@ -114,6 +173,38 @@
             }
         }
 
+
+        // DESCRIPTION
+        // delete a row in a table 
+        // PARAMETERS 
+        // tabeName: the table to be updated
+        // where: key-value array indicating the conditions for which the row must be delete
+        // RETURNS
+        // the number of row affected
+        public function delete($tableName, $where=null) {
+
+            // initialize delete query for table
+            $query  = "DELETE FROM $tableName";
+
+            // initialize where strings which will be concatenated to the final query
+            $wheres = "";
+
+            if($where != null) {
+                $query .= $this->buildWhereClause($where);
+            }
+
+            // try executing the update 
+            try {
+                $stmt = $this->conn->prepare($query);
+                $stmt->execute();
+                return $stmt->rowCount();
+            } catch (Exception $e) {
+                echo $e;
+                return -1;
+            }
+        }
+
+
         // DESCRIPTION
         // build where clause
         // if last char of fieldName id a star it perform a like search
@@ -133,7 +224,7 @@
                         $operator = " IS ";
                         $fieldValue = "NULL";
                     }
-                    $wheres .= ($wheres == " WHERE " ? "" : ",") . ($operator == " LIKE " ? substr($fieldName, 0, -1) : $fieldName) . $operator . $fieldValue;
+                    $wheres .= ($wheres == " WHERE " ? "" : " AND ") . ($operator == " LIKE " ? substr($fieldName, 0, -1) : $fieldName) . $operator . $fieldValue;
                 }
             }
             return $wheres;

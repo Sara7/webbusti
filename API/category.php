@@ -1,39 +1,56 @@
 <?php
+
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
+    include_once("./init.php");
     $action = $_GET["action"];
-    $category_code = $_GET["category_code"];
+    $category_code = $httpData["category_code"];
     
     $pdo = new SQLPdo($db);
     switch($action) {
-        case "list":
-            if($_GET["level"] != null && $_GET["level"] == 0) {
-                $categories = $pdo -> select("category", ["category_parent" => null], ["category_code" => "ASC"]);
-            } else if($_GET["category_code"] != null) {
-                $categories = $pdo -> select("category", ["category_code*" => $category_code], ["category_parent" => "ASC"]);
-            } else {
-                $categories = $pdo -> select("category", [], ["category_parent" => "ASC"]);   
+        case "get":
+            if($httpData["category_code"] != null) {
+                $structured_categories = $pdo -> select("category", ["category_code" => $httpData["category_code"]], null)[0];
             }
-            // $structured_categories = [];
-            // foreach($categories as $cat) {
-            //     if($cat["category_parent"] == null) {
-            //         if(!array_key_exists($cat["category_code"], $structured_categories)) {
-            //             $structured_categories[$cat["category_code"]] = [];
-            //             $structured_categories[$cat["category_code"]]["data"] = $cat;
-            //             $structured_categories[$cat["category_code"]]["childs"] = [];
-            //         }
-            //     } else {
-            //         $parent = $cat["category_parent"];
-        
-            //         if($structured_categories[$parent] != null && !array_key_exists($cat["category_code"], $structured_categories[$parent])) {
-            //             $structured_categories[$parent]["childs"][$cat["category_code"]] = [];
-            //             $structured_categories[$parent]["childs"][$cat["category_code"]]["data"] = $cat;
-            //             $structured_categories[$parent]["childs"][$cat["category_code"]]["childs"] = [];
-            //         }
-            //     }
-            // }
+            break;
+
+        case "list":
+            $structured_categories = [];
+            if($_GET["category_code"] == "0") {
+                $structured_categories = $pdo -> select("category", ["category_level" => 1], ["category_parent" => "ASC"]);
+            } else {
+                $where_category = ["category_code*" => $_GET["category_code"], "category_level" => 1];
+                $categories = $pdo -> select("category", $where_category, ["category_parent" => "ASC"]);
+                
+                foreach($categories as $category) {
+                    $category["childs"] = [];
+                    $structured_categories[$category["category_code"]] = $category;
+                }
+                $where_category["category_level"] = 2;
+                $subcategories = $pdo -> select("category", $where_category, ["category_parent" => "ASC"]);
+                foreach($subcategories as $subcategory) {
+                    $subcategory["childs"] = [];
+                    $structured_categories[$subcategory["category_parent"]]["childs"][$subcategory["category_code"]] = $subcategory;
+                }
+    
+    
+                $where_category["category_level"] = 3;
+                $subsubcategories = $pdo -> select("category", $where_category, ["category_parent" => "ASC"]);
+                foreach($subsubcategories as $subsubcategory) {
+                    $subsubcategory["childs"] = [];
+                    $category_root = explode("_", $subsubcategory["category_code"])[0];
+                    $structured_categories[$category_root]["childs"][$subsubcategory["category_parent"]]["childs"][$subsubcategory["category_code"]] = $subsubcategory;
+                }
+                
+                $levels = explode("_", $_GET["category_code"]);
+                if(sizeof($levels) == 1) {
+                    $structured_categories = $structured_categories[$_GET["category_code"]]["childs"];
+                } else {
+                    $structured_categories = $structured_categories[$levels[0]]["childs"][$_GET["category_code"]]["childs"];//[$levels[1]];
+                }
+            }
             break;
     }
-    echo json_encode($categories);
+    echo json_encode($structured_categories);
 
 ?>
