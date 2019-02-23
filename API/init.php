@@ -10,7 +10,7 @@
         $httpData = $_GET;
     } else if($_SERVER['REQUEST_METHOD'] == 'POST'){
         if(strpos($_SERVER["CONTENT_TYPE"], "multipart/form-data") >= 0) {
-            $httpData = $_POST;
+            $httpData = $_POST ? $_POST : json_decode(file_get_contents('php://input'), true);
         } else {
             $httpData = json_decode(file_get_contents('php://input'), true);    
         }

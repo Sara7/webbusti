@@ -72,16 +72,48 @@
                     }
 
                     $stmt = $this->conn->prepare($query);
+
                     $stmt->execute();
+
                     return $stmt->fetchAll();
                 } catch (Exception $e) {
                     echo "Error while parsing where clauses";
                 }
-
-                
             } catch (Exception $e) {
                 echo $e;
                 return null;
+            }
+        }
+
+
+        public function getTableNameFromField($field) {
+            return explode("_", $field)[0];
+        }
+        // starting from a flat array of mixed types such as product, category, media
+        // it takes the first entity prefix as the main entity (product) 
+        // and creates a structured json with the following entities (one entity per prefix, thus category and media)
+        // as properties of the main entity (product.category and product.media)
+        public function parseJoinedResult($result) {
+            $tables = [];
+            foreach ($result[0] as $k => $v) {
+                $tableName = $this->getTableNameFromField($k);
+                if (!array_key_exists($tableName, $tables)) {
+                    $tables[$tableName] = array();
+                }
+            }
+
+            $first = "";
+            foreach ($result as $record) {
+                $last_table_name = $this->getTableNameFromField(key($record));
+                $obj = [];
+                foreach ($record as $k => $v) {
+                    $table_name = explode("_", $k)[0];
+                    if ($table_name != $last_table_name) {
+                        $tables[$k][] = $obj;
+                        $last_table_name = $table_name;
+                    }
+                    $obj[$k] = $v;
+                }
             }
         }
 
@@ -95,7 +127,6 @@
         // 0 if the insert has been successfull, -1 otherwise
         public function insert($tableName, $what) {
 
-            echo "icoa";
             if (gettype($what) == "string") {
                 $what = json_decode($what, true);
             }
@@ -107,15 +138,17 @@
 
             foreach($what as $fieldName => $fieldValue) {
 
-                $fieldNames     .= (strlen($fieldNames)  == 0 ? "" : ",") . $fieldName;
-                $fieldValues    .= (strlen($fieldValues) == 0 ? "" : ",") . ($fieldValue == null ? 'NULL' : (is_string($fieldValue) ? "'" . $fieldValue . "'" : $fieldValue));
+                if ($fieldValue) {
+                    $fieldNames     .= (strlen($fieldNames)  == 0 ? "" : ",") . $fieldName;
+                    $fieldValues    .= (strlen($fieldValues) == 0 ? "" : ",") . ($fieldValue == null ? 'NULL' : (is_string($fieldValue) ? "'" . $fieldValue . "'" : $fieldValue));
+                }
             }
             $query .= " (" . $fieldNames . ") VALUES (" . $fieldValues . ")";
 
-            try {
-                $stmt = $this->conn->prepare($query);
 
-                echo $query;
+            try {
+                
+                $stmt = $this->conn->prepare($query);
                 $queryResult = $stmt->execute();
                 
                 if($queryResult) {

@@ -14,8 +14,9 @@
             return preg_replace($pattern, '_thumb.$1', $filename);
         }
 
-        public function Hello() {
-            return "ciao";
+        public static function getThumbnail($filename) {
+            $pattern = "/\.(\w*)$/";
+            return preg_replace($pattern, '_thumb.$1', $filename);
         }
     }
 ?>

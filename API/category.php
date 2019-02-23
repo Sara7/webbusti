@@ -17,10 +17,10 @@
         case "list":
             $structured_categories = [];
             if($_GET["category_code"] == "0") {
-                $structured_categories = $pdo -> select("category", ["category_level" => 1], ["category_parent" => "ASC"]);
+                $structured_categories = $pdo -> select("category", ["category_level" => 1], ["category_order"=>"ASC", "category_parent" => "ASC"]);
             } else {
                 $where_category = ["category_code*" => $_GET["category_code"], "category_level" => 1];
-                $categories = $pdo -> select("category", $where_category, ["category_parent" => "ASC"]);
+                $categories = $pdo -> select("category", $where_category, ["category_order" => "ASC", "category_parent" => "ASC"]);
                 
                 foreach($categories as $category) {
                     $category["childs"] = [];
@@ -47,6 +47,14 @@
                     $structured_categories = $structured_categories[$_GET["category_code"]]["childs"];
                 } else {
                     $structured_categories = $structured_categories[$levels[0]]["childs"][$_GET["category_code"]]["childs"];//[$levels[1]];
+                }
+            }
+            if(isset($httpData["countProducts"])) {
+                foreach($structured_categories as $k => &$v) {
+                    foreach($v["childs"] as $k1 => &$v1) {
+                        $result = $pdo->select("product", ["product_category" => $v1["category_code"]]);
+                        $v1["products_count"] = sizeOf($result);
+                    }
                 }
             }
             break;

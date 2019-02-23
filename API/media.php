@@ -14,4 +14,12 @@
             echo json_encode($media);
             break;
     }
+
+    class Media {
+        public static function getThumbnail(&$media) {
+            if(array_key_exists("media_url")) {
+                //$media["media_thumb_url"] = $utility -> getThumbName($media["media_url"]);
+            }
+        }
+    }
 ?>
