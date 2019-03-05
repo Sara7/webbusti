@@ -15,6 +15,7 @@
             $httpData = json_decode(file_get_contents('php://input'), true);    
         }
     } 
+
     if(array_key_exists('action', $httpData)) {
         $action = $httpData["action"];
     }

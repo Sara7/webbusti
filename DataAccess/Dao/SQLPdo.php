@@ -37,7 +37,6 @@
                 if($orderBy != null) {
                     $query .= $this->buildOrderByClause($orderBy);
                 }
-
                 $stmt = $this->conn->prepare($query);
                 $stmt->execute();
                 return $stmt->fetchAll();
@@ -138,13 +137,15 @@
 
             foreach($what as $fieldName => $fieldValue) {
 
+                if($fieldValue == "NULL") {
+                    $fieldValue = null;
+                }
                 if ($fieldValue) {
                     $fieldNames     .= (strlen($fieldNames)  == 0 ? "" : ",") . $fieldName;
                     $fieldValues    .= (strlen($fieldValues) == 0 ? "" : ",") . ($fieldValue == null ? 'NULL' : (is_string($fieldValue) ? "'" . $fieldValue . "'" : $fieldValue));
                 }
             }
             $query .= " (" . $fieldNames . ") VALUES (" . $fieldValues . ")";
-
 
             try {
                 
@@ -237,6 +238,16 @@
             }
         }
 
+        public function customQuery($query) {
+            try {
+                $stmt = $this->conn->prepare($query);
+                $stmt->execute();
+                return $stmt->fetchAll();
+            } catch (Exception $e) {
+                echo $e;
+                return -1;
+            }
+        }
 
         // DESCRIPTION
         // build where clause
@@ -247,6 +258,7 @@
                 foreach($where as $fieldName => $fieldValue) {
                     if($fieldValue != null) {
                         substr($fieldName, -1) == "*" ? $operator = " LIKE " : $operator = " = ";
+                        substr($fieldName, -1) == "|" ? $logicalOperator = " OR " : $logicalOperator = " AND ";
                         if(is_string($fieldValue)) {
                             if($operator == " LIKE ") {
                                 $fieldValue = "%" . $fieldValue . "%";
@@ -257,7 +269,7 @@
                         $operator = " IS ";
                         $fieldValue = "NULL";
                     }
-                    $wheres .= ($wheres == " WHERE " ? "" : " AND ") . ($operator == " LIKE " ? substr($fieldName, 0, -1) : $fieldName) . $operator . $fieldValue;
+                    $wheres .= ($wheres == " WHERE " ? "" : $logicalOperator) . ($operator == " LIKE " ? substr($fieldName, 0, -1) : $fieldName) . $operator . $fieldValue;
                 }
             }
             return $wheres;

@@ -52,7 +52,7 @@
             if(isset($httpData["countProducts"])) {
                 foreach($structured_categories as $k => &$v) {
                     foreach($v["childs"] as $k1 => &$v1) {
-                        $result = $pdo->select("product", ["product_category" => $v1["category_code"]]);
+                        $result = $pdo->select("product", ["product_category" => $v1["category_id"]]);
                         $v1["products_count"] = sizeOf($result);
                     }
                 }

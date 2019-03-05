@@ -3,9 +3,8 @@
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("./init.php");
     include_once("./../utilities/Utility.php");
-    $pdo = new SQLPdo($db);
-    include_once("./functions.php");
 
+    $pdo = new SQLPdo($db);
     switch($action) {
         case "get":
             if($httpData["product_id"] != null) {
@@ -15,22 +14,17 @@
                 $result = $result ? $result[0] : die("No product found for id $product_id");
                 $result["product_desc_default"] = base64_decode($result["product_desc_default"]);
 
-                $availability       = getAvailability($product_id);
-                $media              = getMediaPerProduct($product_id);
-                $paired_products    = getPairedProducts($product_id);
-                $category           = getCategoryById($result["product_category"]);
-                $features           = getFeaturesPerProduct($product_id);
+                $availability    = getAvailability($product_id);
+                $media           = getMediaPerProduct($product_id);
+                $paired_products = getPairedProducts($product_id);
+                $features        = getFeaturesPerProduct($product_id);
+                $features        = getCategoryInfo($product_id);
 
-                foreach($features as &$feature) {
-                    $feature_values = getFeatureValues($feature["feature_id"]);
-                    $feature["feature_values"] = $feature_values;
-                }
-
-                $result["availability"]     = $availability;
-                $result["product_media"]    = $media;
-                $result["paired_products"]  = $paired_products;
-                $result["features"]         = $features;
-                $result["product_category"] = $category;
+                $result["availability"]    = $availability;
+                $result["media"]           = $media;
+                $result["paired_products"] = $paired_products;
+                $result["features"]        = $features;
+                //$result["category"]        = $featu
 
             } else {
                 die("No product id");
@@ -47,23 +41,19 @@
                     $categories_string = "";
                     $result = [];
                     foreach($categories as $category) {
-                        $result = array_merge($result, $pdo -> select("product", ["product_category" => $category["category_id"]], ["product_id" => "DESC"]));
+                        $result = array_merge($result, $pdo -> select("product", ["product_category" => $category["category_id"]]));
                     }
                 } else {
-                    $result = $pdo -> select("product", ["product_id" => $product_category], ["product_id" => "DESC", "product_category" => "ASC"]);
+                    $result = $pdo -> select("product", $where, ["product_id" => "DESC", "product_category" => "ASC"]);
                 }
-            } else {
-                $result = $pdo -> select("product", $where, ["product_id" => "DESC", "product_category" => "ASC"]);
             }
             
-            
             foreach ($result as &$record) {
-                $category           = getCategoryById($record["product_category"]);
+                $category           = getCategoryInfo($record["product_category"]);
                 $media_per_product  = getMediaPerProduct($record["product_id"]);
-                $record["product_category"] = $category;
-                $record["product_media"] = $media_per_product;
+                $record["category"] = $category;
+                $record["media"] = $media_per_product;
                 $record["product_desc_default"] = base64_decode($record["product_desc_default"]);
-                $record["features"] = getFeaturesPerProduct($record["product_id"]);
 
                 $canAdd = true;
                 if(isset($httpData["featured"])){
@@ -72,27 +62,11 @@
                     }
                 }
                 if(isset($httpData["media_role"])) {
-                    if($media_array) {
-                        foreach($media_array as $media_arr) {
-                            if(!$media_arr["media_role"] == $httpData["media_role"]) {
-                            }
+                    foreach($media_array as $media_arr) {
+                        if(!$media_arr["media_role"] == $httpData["media_role"]) {
                         }
                     }
                 }
-            }
-
-            if($httpData["hashed"] != null) {
-                $structured_products = [];
-                foreach($result as $res) {
-                    $category_code = $res["product_category"]["category_code"];
-                    $product_category_root = explode("_", $category_code)[0];
-
-                    if(!array_key_exists($product_category_root, $structured_products)) {
-                        $structured_products[$product_category_root] = [];
-                    }
-                    $structured_products[$product_category_root][] = $res;   
-                }
-                $result = $structured_products;
             }
             break;
 
@@ -101,63 +75,19 @@
                 $product = json_decode($httpData["product"], true);
                 $product["product_desc_default"] = base64_encode($product["product_desc_default"]);
                 $media = null;
-                $features = $product["features"];
-                $availability = $product["availability"];
-                unset($product["features"]);
-                unset($product["availability"]);
-
-
-
                 if (isset($product["product_media"]) && $product["product_media"] != null) {
                     $media = $product["product_media"];
                     $product["product_media"] = null;
                 } 
                 $result = $pdo -> insert("product", $product);
-                if(!$result) die("INSERT");
-                $product_id = $result;
                 if($media) {
                     $result3 = $pdo -> insert("media_per_entity", ["media_per_entity_media" => $media["media_id"], "media_per_entity_role" => 3, "media_per_entity_product" => $result]);
                 }
-
-                addAvailability($product_id, $availability);
-                addFeaturesPerProduct($product_id, $features);
                 
             } else {
                 $result = $pdo -> insert("product", $httpData["product"]);
-                $result = "false";
+                $result = false;
             }
-            break;
-
-        case "edit":
-            if($httpData["product"]) {
-                $product = json_decode($httpData["product"], true);
-                $product["product_desc_default"] = base64_encode($product["product_desc_default"]);
-                $product_id = $product["product_id"];
-                unset($product["product_id"]);
-                $features = $product["features"];
-                unset($product["features"]);
-                $media = $product["product_media"];
-                unset($product["product_media"]);
-                $paired_products = $product["paired_products"];
-                unset($product["paired_products"]);
-                $category = $product["product_category"];
-                unset($product["product_category"]);
-                $availability = $product["availability"];
-                unset($product["availability"]);
-
-                $result = $pdo -> update("product", $product, ["product_id" => $product_id]);
-                $media = null;
-               
-                if($media) {
-                    $result2 = $pdo -> delete("media_per_entity", ["media_per_entity_role" => 3, "media_per_entity_product" => $product_id]);
-                    $result3 = $pdo -> insert("media_per_entity", ["media_per_entity_media" => $media["media_id"], "media_per_entity_role" => 3, "media_per_entity_product" => $result]);
-                }
-                
-                $pdo->delete("feature_per_product", ["feature_per_product_product" => $product_id]);
-                addFeaturesPerProduct($product_id, $features);
-                editAvailability($product_id, $availability);
-                $result = true;
-            } 
             break;
 
         case "codeList":
@@ -175,36 +105,22 @@
             $role=$httpData["role"];
             $result = $pdo -> insert("media_per_entity", ["media_per_entity_media" => $media_id, "media_per_entity_role" => $role, "media_per_entity_product" => $product_id]);
             break;
-
         case "setFeatured":
-            $product_id = $httpData["product_id"];
-            $is_featured = $httpData["is_featured"];
-            if($is_featured) {
-                $result = $pdo -> insert("featured_product", ["featured_product_product_id" => $product_id]);
-            } else {
-                $result = $pdo -> delete("featured_product", ["featured_product_product_id" => $product_id]);
-            }
-            break;
 
+            $product_id = $httpData["product_id"];
+            $result = $pdo -> insert("featured_product", ["featured_product_product_id" => $product_id]);
+            break;
         case "addPairings": 
             $product_id = $httpData["product_id"];
             $pairings = $httpData["pairings"];
-            addPairings($product_id, $pairings);
+            foreach($pairings as $k=>$v) {
+                $result = $pdo->insert("pairing", ["pairing_product_id_1" => $product_id, "pairing_product_id_2" => $v, "pairing_title_default" => $k]);
+            }
             break;
-        
-        case "editPairings":
-            $product_id = $httpData["product_id"];
-            $pairings = $httpData["pairings"];
-            $result = $pdo->delete("pairing", ["pairing_product_id_1" => $product_id]);
-            $result2 = $pdo->delete("pairing", ["pairing_product_id_2" => $product_id]);
-            addPairings($product_id, $pairings);
-            break;
-
         case "remove":
             $product_id = $httpData["product_id"];
             $result = $pdo-> delete("product", ["product_id" => $product_id]);
             break;
-
         case "addAvailability":
             $product_id = $httpData["product_id"] * 1;
             $availability = $httpData["availability"];
@@ -213,39 +129,42 @@
             } 
             $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
             break;
-
-        case "editAvailability":
-            $product_id = $httpData["product_id"] * 1;
-            $availability = $httpData["availability"];
-            if(sizeOf($availability) == 12) {
-                $availability_string = implode("|", $availability);
-            } 
-            $result = $pdo->delete("product_availability", ["product_availability_product_id" => $product_id]);
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
-            break;
-        
        
     }
-    echo json_encode($result);
+    //echo json_encode($result);
 
     function getAvailability($product_id) {
         $result = $GLOBALS["pdo"] -> select("product_availability", ["product_availability_product_id" => $product_id]);
 
-        $av_array = [];
+        $availability = [];
         if($result) {
             $result = $result[0];
             $av_array = explode("|", $result["product_availability_value"]);
+            foreach($av_array as $element) {
+                switch($element) {
+                    case "1":
+                        $availability[]="yes";
+                        break;
+                    case "2":
+                        $availability[]="maybe";
+                        break;
+                    case "3":
+                        $availability[]="nope";
+                        break;
+                    default:
+                        $availability[]="yes";
+                        break;
+                }
+            }
         }
-        return $av_array;
+        return $availability;
     }
 
     function getMediaPerProduct($product_id) {
         $result = $GLOBALS["pdo"] -> select("media_per_entity", ["media_per_entity_product" => $product_id]);
         $media = [];
         foreach($result as $row) {
-            $mediaInfo = getMediaInfo($row["media_per_entity_media"]);
-            $mediaInfo["media_role"] = $row["media_per_entity_role"];
-            $media[] = $mediaInfo;
+            $media[] = getMediaInfo($row["media_per_entity_media"]);
         }
         return $media;
     }
@@ -255,18 +174,8 @@
         return $result ? $result[0] : [];
     }
 
-    function getCategoryByCode($category_code) {
+    function getCategoryInfo($category_code) {
         $result = $GLOBALS["pdo"] -> select("category", ["category_code" => $category_code]);
-        return $result ? $result[0] : [];
-    }
-
-    function addPairings($product_id, $pairings) {
-        foreach($pairings as $k=>$v) {
-            $result = $GLOBALS["pdo"]->insert("pairing", ["pairing_product_id_1" => $product_id, "pairing_product_id_2" => $v, "pairing_title_default" => $k]);
-        }
-    }
-    function getCategoryById($category_id) {
-        $result = $GLOBALS["pdo"] -> select("category", ["category_id" => $category_id]);
         return $result ? $result[0] : [];
     }
 
@@ -302,26 +211,10 @@
         return $result ? $result : [];
     }
 
-
-    function getFeatureInfo($feature_id) {
-        $result =  $GLOBALS["pdo"] -> select ("feature", ["feature_id" => $feature_id]);
-        return $result ? $result[0] : null;
+    function getFeaturesPerProduct($product_id) {
+        $result = $GLOBALS["pdo"] -> select("feature_per_product", ["feature_per_product_product" => $product_id]);
+        return $result ? $result : [];
     }
-
-    function editAvailability($product_id, $availability) {
-        if(sizeOf($availability) == 12) {
-            $availability_string = implode("|", $availability);
-        } 
-        $result = $GLOBALS["pdo"]->delete("product_availability", ["product_availability_product_id" => $product_id]);
-        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
-    }
-
-    function addAvailability($product_id, $availability) {
-        $availability_string = implode("|", $availability);
-        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
-    }
-
-    
 
     // $result = $pdo -> select("feature_per_category");
     // foreach($result as $row) {

@@ -1,12 +1,6 @@
 <?php
 
-
-    //reuirements
-    require_once('./OAuth2/Autoloader.php');
-
-    // error reporting (this is a demo, after all!)
-    ini_set('display_errors',1);error_reporting(E_ALL);
-
+    require_once(__DIR__.'/OAuth2/Autoloader.php');
 
     OAuth2\Autoloader::register();
 
