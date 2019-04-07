@@ -1,9 +1,11 @@
 <?php
+
+    use DataAccess\Dao\SQLPdo;
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("./init.php");
     include_once("./../utilities/Utility.php");
-    $pdo = new SQLPdo($db);
+    $pdo = new SQLPdo($db->getPdo());
     include_once("./functions.php");
 
     switch($action) {
@@ -92,17 +94,17 @@
                         $canAdd = false;
                     }
                 }
-                if(isset($httpData["media_role"])) {
-                    if($media_array) {
-                        foreach($media_array as $media_arr) {
-                            if(!$media_arr["media_role"] == $httpData["media_role"]) {
-                            }
-                        }
-                    }
-                }
+                // if(isset($httpData["media_role"])) {
+                //     if($media_array) {
+                //         foreach($media_array as $media_arr) {
+                //             if(!$media_arr["media_role"] == $httpData["media_role"]) {
+                //             }
+                //         }
+                //     }
+                // }
             }
 
-            if($httpData["hashed"] != null) {
+            if(isset($httpData["hashed"])) {
                 $structured_products = [];
                 foreach($result as $res) {
                     $category_code = $res["product_category"]["category_code"];

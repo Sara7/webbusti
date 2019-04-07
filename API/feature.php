@@ -1,8 +1,11 @@
 <?php
+
+    use DataAccess\Dao\SQLPdo;
+    
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("./init.php");
-    $pdo = new SQLPdo($db);
+    $pdo = new SQLPdo($db->getPdo());
     include_once("./functions.php");
 
     switch($action) {

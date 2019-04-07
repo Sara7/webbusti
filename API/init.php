@@ -1,5 +1,10 @@
 <?php
 
+    use DataAccess\Config\Database;
+
+    $db  = new Database("89.46.111.53", "Sql1148692", "83j228v3zt", "Sql1148692_4");
+    
+
     $httpData = null;
     $action = null;
     $data = null;

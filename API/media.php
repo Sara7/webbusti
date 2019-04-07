@@ -1,16 +1,20 @@
 <?php
+
+use DataAccess\Dao\SQLPdo;
+    
+
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("../utilities/Utility.php");
     include_once("./init.php");
-    $pdo = new SQLPdo($db);
+    $pdo = new SQLPdo($db->getPdo());
     $utility = new Utility();
     switch($action) {
         case "list":
             $media = $pdo -> select("media");
-            foreach($media as &$image) {
-                $image["media_thumb_url"] = $utility -> getThumbName($image["media_url"]);
-            }
+            // foreach($media as &$image) {
+            //     $image["media_thumb_url"] = $utility -> getThumbName($image["media_url"]);
+            // }
             echo json_encode($media);
             break;
     }

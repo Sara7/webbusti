@@ -1,12 +1,14 @@
 <?php
 
+use DataAccess\Dao\SQLPdo;
+
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("./init.php");
     $action = $_GET["action"];
     $category_code = $httpData["category_code"];
     
-    $pdo = new SQLPdo($db);
+    $pdo = new SQLPdo($db->getPdo());
     switch($action) {
         case "get":
             if($httpData["category_code"] != null) {
@@ -23,14 +25,23 @@
                 $res = $pdo -> select("category", ["category_code*" => $_GET["category_code"]], ["category_order"=>"ASC", "category_parent" => "ASC"]);
                 foreach($res as $cat) {
                     if ($cat["category_code"] != $_GET["category_code"]) {
-                        $media_id = $pdo -> select("media_per_entity", ["media_per_entity_category" => $cat["category_id"], "media_per_entity_role" => 4])[0]["media_per_entity_media"];
+                        
+                        $media_id = $pdo -> select("media_per_entity", ["media_per_entity_category" => $cat["category_id"], "media_per_entity_role" => 7])[0]["media_per_entity_media"];
                         $media = $pdo -> select("media", ["media_id" => $media_id])[0];
                         $cat["category_logo"] = $media;
                         $cat_id = $cat["category_id"];
-                        $query = "select distinct product.*, media.* from product left join media_per_entity on product.product_id = media_per_entity.media_per_entity_product left join media on media_per_entity_media = media.media_id where media_per_entity_role = 3 and product.product_category = $cat_id";
-    
+                        
+                        $query = "select distinct product.*, media.* from product left join media_per_entity on product.product_id = media_per_entity.media_per_entity_product and media_per_entity_role = 3 left join media on media_per_entity_media = media.media_id where product.product_category = $cat_id and product.product_visibility = 4";
                         $products = $pdo -> customQuery($query);
+                        foreach($products as &$prod) {
+                            //$prod["product_desc_default"] = base64_decode($prod["product_desc_default"]);
+                        }
                         $cat["products"] = $products;
+
+                        $query = "select media.* from media_per_entity left join media on media.media_id = media_per_entity.media_per_entity_media where media_per_entity_category = $cat_id and media_per_entity_role =4";
+                        $media = $pdo -> customQuery($query);
+
+                        $cat["media"] = $media;
                         $structured_categories[] = $cat;
                     }
                 }

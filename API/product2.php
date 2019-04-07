@@ -169,7 +169,7 @@
         return $media;
     }
 
-    function  getMediaInfo($media_id) {
+    function getMediaInfo($media_id) {
         $result = $GLOBALS["pdo"] -> select("media", ["media_id" => $media_id]);
         return $result ? $result[0] : [];
     }
