@@ -32,6 +32,27 @@
                 $result["features"]         = $features;
                 $result["product_category"] = $category;
 
+                if($httpData["for_website"]) {
+                    for($i = 0; $i < count($media); $i++) {
+                        if($media[$i]["media_role"] != 4) {
+                            array_splice($media, $i, 1);
+                        }
+                    }
+                    $result["product_media"]    = $media;
+
+                    $i = 0;
+                    foreach($features as &$feature) {
+                        if(!in_array($feature["feature_id"], ["12", "35", "14", "23"])) {
+                            unset($features[$i]);
+                        } else {
+                            $valName = $pdo -> select("values_per_feature", ["values_per_feature_id" => $feature["feature_value"]])[0]["values_per_feature_value_name_default"];
+                            $feature["feature_val_name"] = $valName;
+                        }
+                        $i++;
+                    }
+                }
+                $result["features"] = $features;
+
             } else {
                 die("No product id");
             }

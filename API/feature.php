@@ -41,9 +41,9 @@
             foreach($result as &$feature) {
                 $feature_detail = $pdo -> select("feature", ["feature_id" => $feature["feature_per_category_feature"]])[0];
                 $feature_values = getFeatureValues($feature["feature_per_category_feature"]);
-                // foreach($feature_values as &$value) {
-                //     getNumProdPerFeatureValue($feature["feature_id"], $)
-                // }
+                foreach($feature_values as &$value) {
+                    $value["num_prod"] = getProductsCountPerFeatureValue($value["feature_value_id"]);
+                }
                 $feature["feature_values"] = $feature_values;
                 $feature["feature_value"] = null;
                 $feature["num_prod"] = getProductsCountPerFeature($feature["feature_id"]);
@@ -67,6 +67,7 @@
             $result["feature_values"] = $values;
             $result["feature_value"] = null;
             break;
+        
 
     }
 
@@ -75,6 +76,9 @@
     function getProductsCountPerFeature($feature_id){
         $result = $GLOBALS["pdo"]->customQuery("select count(*) num_prod from feature_per_product where feature_per_product_feature=$feature_id");
         return $result ? $result[0]["num_prod"] : 0;
-
+    }
+    function getProductsCountPerFeatureValue($feature_value_id) {
+        $result = $GLOBALS["pdo"]->customQuery("select count(*) num_prod from feature_per_product join product on product.product_id = feature_per_product.feature_per_product_product where feature_per_product_value=$feature_value_id and (product_visibility & 2) > 0");
+        return $result ? $result[0]["num_prod"] : 0;
     }
 ?>
