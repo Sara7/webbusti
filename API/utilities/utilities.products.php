@@ -53,7 +53,7 @@
 
         public static function setAvailability($pdo, $product_id, $availability) {
             $availability_string = implode("|", $availability);
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+            $result = $pdo->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
         }
 
         public static function getMediaPerProduct($pdo, $product_id) {

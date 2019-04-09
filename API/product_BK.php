@@ -14,7 +14,7 @@
                 if($result) $result = $result[0];
                 else die("No product with id $id found");
 
-                $result2 = $pdo -> select("product_availability", ["product_availability_product_id" => $id]);
+                $result2 = $pdo -> select("product_availability", ["product_availability_product" => $id]);
                 if($result2) {
                     $availability = [];
                     $av_array = explode("|", $result2[0]["product_availability_value"]);
@@ -223,7 +223,7 @@
             if(sizeOf($availability) == 12) {
                 $availability_string = implode("|", $availability);
             } 
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+            $result = $pdo->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
             break;
        
     }

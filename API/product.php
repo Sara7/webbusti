@@ -117,6 +117,7 @@
                 }
                 $result = $structured_products;
             }
+
             break;
 
         case "add":
@@ -234,7 +235,7 @@
             if(sizeOf($availability) == 12) {
                 $availability_string = implode("|", $availability);
             } 
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+            $result = $pdo->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
             break;
 
         case "editAvailability":
@@ -243,8 +244,8 @@
             if(sizeOf($availability) == 12) {
                 $availability_string = implode("|", $availability);
             } 
-            $result = $pdo->delete("product_availability", ["product_availability_product_id" => $product_id]);
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+            $result = $pdo->delete("product_availability", ["product_availability_product" => $product_id]);
+            $result = $pdo->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
             break;
         
        
@@ -252,7 +253,7 @@
     echo json_encode($result);
 
     function getAvailability($product_id) {
-        $result = $GLOBALS["pdo"] -> select("product_availability", ["product_availability_product_id" => $product_id]);
+        $result = $GLOBALS["pdo"] -> select("product_availability", ["product_availability_product" => $product_id]);
 
         $av_array = [];
         if($result) {
@@ -335,13 +336,13 @@
         if(sizeOf($availability) == 12) {
             $availability_string = implode("|", $availability);
         } 
-        $result = $GLOBALS["pdo"]->delete("product_availability", ["product_availability_product_id" => $product_id]);
-        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+        $result = $GLOBALS["pdo"]->delete("product_availability", ["product_availability_product" => $product_id]);
+        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
     }
 
     function addAvailability($product_id, $availability) {
         $availability_string = implode("|", $availability);
-        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+        $result = $GLOBALS["pdo"]->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
     }
 
     

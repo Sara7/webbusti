@@ -127,14 +127,14 @@
             if(sizeOf($availability) == 12) {
                 $availability_string = implode("|", $availability);
             } 
-            $result = $pdo->insert("product_availability", ["product_availability_product_id" => $product_id, "product_availability_value" => $availability_string]);
+            $result = $pdo->insert("product_availability", ["product_availability_product" => $product_id, "product_availability_value" => $availability_string]);
             break;
        
     }
     //echo json_encode($result);
 
     function getAvailability($product_id) {
-        $result = $GLOBALS["pdo"] -> select("product_availability", ["product_availability_product_id" => $product_id]);
+        $result = $GLOBALS["pdo"] -> select("product_availability", ["product_availability_product" => $product_id]);
 
         $availability = [];
         if($result) {
