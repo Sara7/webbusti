@@ -17,6 +17,6 @@ $pdo = new Dao\SQLPdo($db->getPdo());
 
 $app = new Slim\App();
 
-require_once("_product.php");
+require_once("./routes/product.php");
 
 $app->run();
