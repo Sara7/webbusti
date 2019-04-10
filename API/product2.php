@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
     include_once("../DataAccess/Config/init.php");
     include_once("../DataAccess/Dao/SQLPdo.php");
     include_once("./init.php");
@@ -236,4 +236,4 @@
 // //        $pdo -> update("feature_per_product", ["feature_per_product_feature" => $feature_id["feature_id"]], ["feature_per_product_feature" => $feature_id["feature_code"]]);
 //         $pdo -> update("feature_per_product", ["feature_per_product_product" => $product_id["product_id"]], ["feature_per_product_product" => $product_id["product_code"]]);
 //     }
-?>
+?> -->
