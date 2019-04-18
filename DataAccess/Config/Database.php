@@ -4,8 +4,7 @@ namespace DataAccess\Config;
 
 use PDO;
 
-class Database
-{
+class Database {
 
     private $pdo;
     private $hostname;
@@ -17,8 +16,7 @@ class Database
     private $_driver = "mysql";
 
     // constructor (initialize connection)
-    public function __construct($hostname, $username, $password, $dbname)
-    {
+    public function __construct($hostname, $username, $password, $dbname) {
         $this->charset = 'utf8mb4';
         $this->hostname = $hostname;
         $this->username = $username;
@@ -50,8 +48,7 @@ class Database
     }
 
     // try to connect to database
-    public function connect()
-    {
+    public function connect() {
         try {
             $this->pdo = new PDO($this->dsn, $this->username, $this->password, $this->options);
             return $this->pdo;
@@ -61,24 +58,24 @@ class Database
     }
 
     // getters
-    public function getUsername()
-    {
+    public function getUsername() {
         return $this->username;
     }
-    public function getPassword()
-    {
+
+    public function getPassword() {
         return $this->password;
     }
-    public function getDbname()
-    {
+
+    public function getDbname() {
         return $this->dbname;
     }
-    public function getDsn()
-    {
+
+    public function getDsn() {
         return $this->dsn;
     }
-    public function getOptions()
-    {
+
+    public function getOptions() {
         return $this->options;
     }
+
 }

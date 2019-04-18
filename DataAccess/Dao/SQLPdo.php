@@ -6,22 +6,18 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-class SQLPdo
-{
+class SQLPdo {
 
     public $pdo;
 
     //construct a pdo class by passing the instantiated database
-    public function __construct($pdo)
-    {
+    public function __construct($pdo) {
         if ($pdo != null) {
             $this->pdo = $pdo;
         } else {
             die("PDO IS NULL");
         }
     }
-
- 
 
     // DESCRIPTION
     // insert a record in a table
@@ -30,8 +26,7 @@ class SQLPdo
     // where: optional key-value array indicating the conditions for which the select must be done
     // RETURNS
     // if successfull returns an associative array having the key with field name and the value with the field value, null otherwise
-    public function select($tableName, $where = null, $orderBy = null)
-    {
+    public function select($tableName, $where = null, $orderBy = null) {
         try {
             $query = "SELECT * FROM $tableName";
 
@@ -46,7 +41,7 @@ class SQLPdo
 
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
-            if(!($stmt->errorInfo()[0] === '00000')) {
+            if (!($stmt->errorInfo()[0] === '00000')) {
                 die($stmt->errorInfo()[2]);
             }
             $r = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -57,9 +52,7 @@ class SQLPdo
         }
     }
 
-    public function selectJoin($tablesNames, $joinCriteria, $where = null, $orderBy = null)
-    {
-
+    public function selectJoin($tablesNames, $joinCriteria, $where = null, $orderBy = null) {
         try {
             $query = "";
             for ($i = 0; $i < sizeof($tablesNames); $i++) {
@@ -104,9 +97,7 @@ class SQLPdo
     // what: key-value array describing the field names and field values of the entity
     // RETURNS
     // 0 if the insert has been successfull, -1 otherwise
-    public function insert($tableName, $what)
-    {
-
+    public function insert($tableName, $what) {
         if (gettype($what) == "string") {
             $what = json_decode($what, true);
         }
@@ -121,7 +112,8 @@ class SQLPdo
         $what[$tableName . "_id"] = null;
         foreach ($what as $fieldName => $fieldValue) {
 
-            if($fieldValue == null) $fieldValue = 'NULL';
+            if ($fieldValue == null)
+                $fieldValue = 'NULL';
             $fieldNames .= (strlen($fieldNames) == 0 ? "" : ",") . $fieldName;
             $fieldValues .= (strlen($fieldValues) == 0 ? "" : ",") . ($fieldValue == 'NULL' ? 'NULL' : (is_string($fieldValue) ? "'" . $fieldValue . "'" : $fieldValue));
         }
@@ -131,7 +123,7 @@ class SQLPdo
 
             $stmt = $this->pdo->prepare($query);
             $queryResult = $stmt->execute();
-            
+
             if ($queryResult) {
                 return $this->pdo->lastInsertId();
             }
@@ -145,7 +137,6 @@ class SQLPdo
             //     if ($res != null) {
             //         return $res["LAST_INSERT_ID"];
             //     }
-
             //     return false;
             // }
             // return true;
@@ -162,8 +153,7 @@ class SQLPdo
     // where: key-value array indicating the conditions for which the update must be done
     // RETURNS
     // the number of row affected
-    public function update($tableName, $what, $where = null)
-    {
+    public function update($tableName, $what, $where = null) {
 
         // initialize update query for table
         $query = "UPDATE $tableName";
@@ -202,8 +192,7 @@ class SQLPdo
     // where: key-value array indicating the conditions for which the row must be delete
     // RETURNS
     // the number of row affected
-    public function delete($tableName, $where = null)
-    {
+    public function delete($tableName, $where = null) {
 
         // initialize delete query for table
         $query = "DELETE FROM $tableName";
@@ -226,13 +215,11 @@ class SQLPdo
         }
     }
 
-    public function customQuery($query)
-    {
+    public function customQuery($query) {
         try {
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
-
         } catch (Exception $e) {
             echo $e;
             return -1;
@@ -242,8 +229,7 @@ class SQLPdo
     // DESCRIPTION
     // build where clause
     // if last char of fieldName id a star it perform a like search
-    private static function buildWhereClause($where)
-    {
+    private static function buildWhereClause($where) {
         $wheres = " WHERE ";
         if ($where != null) {
             foreach ($where as $fieldName => $fieldValue) {
@@ -268,8 +254,7 @@ class SQLPdo
 
     // DESCRIPTION
     // build orderby clause
-    private static function buildOrderByClause($orderBy)
-    {
+    private static function buildOrderByClause($orderBy) {
         $orderByQuery = " ORDER BY ";
         if ($orderBy != null) {
             foreach ($orderBy as $fieldName => $orderType) {
@@ -281,8 +266,7 @@ class SQLPdo
     }
 
     // get table by field prefix
-    private static function getTableNameFromField($field)
-    {
+    private static function getTableNameFromField($field) {
         return explode("_", $field)[0];
     }
 
@@ -290,8 +274,7 @@ class SQLPdo
     // it takes the first entity prefix as the main entity (product)
     // and creates a structured json with the following entities (one entity per prefix, thus category and media)
     // as properties of the main entity (product.category and product.media)
-    private function parseJoinedResult($result)
-    {
+    private function parseJoinedResult($result) {
         $tables = [];
         foreach ($result[0] as $k => $v) {
             $tableName = $this->getTableNameFromField($k);
@@ -318,11 +301,13 @@ class SQLPdo
     public function beginTransaction() {
         $this->pdo->beginTransaction();
     }
+
     public function commit() {
         $this->pdo->commit();
     }
+
     public function rollback() {
         $this->pdo->rollback();
     }
-    
+
 }
