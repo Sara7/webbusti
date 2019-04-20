@@ -1,9 +1,7 @@
 <?php
 
 class User extends Entity {
-
-    static $instances = [];        // array of instances
-
+    // Constants
     const OBJECT_NAME = "User";
     const TABLE_NAME = "user";
     const TABLE_ALIAS = "u";
@@ -11,6 +9,32 @@ class User extends Entity {
     const FIELD_PREFIX = "user";
     const KEY_FIELD = "id";
 
+    // Static property
+    static $instances = [];        // array of instances
+    static $editable_fields = [
+        "type",
+        "firstname",
+        "lastname",
+        "company_name",
+        "company_sdi_code",
+        "company_pec",
+        "company_vat_number",
+        "fiscal_code",
+        "birthdate",
+        "qualification_id",
+        "email",
+        "salt",
+        "password",
+        "deleted",
+        "privacy_policy",
+        "promo",
+        "newsletter",
+        "activation_code",
+        "password_recovery_code",
+        "is_admin"
+    ];
+
+    // Public properties
     public $id;
     public $type;
     public $firstname;
@@ -32,7 +56,84 @@ class User extends Entity {
     public $activation_code;
     public $password_recovery_code;
     public $is_admin;
+    
+    // Magic methods
+    public function __get($property) {
+        switch ($property) {
+            case "qualification":
+                return $this->$property = Qualification::resolve($this->qualification_id);
+            default:
+                trigger_error("Undefined property '$property' in " . get_class($this));
+                break;
+        }
+    }
 
+    public static function _reset () {
+        self::$instances = [];
+    }
+    
+    public function edit ($v = []) {
+        $sql = "UPDATE " . self::TABLE_NAME . " SET " . self::FIELD_PREFIX_US . self::KEY_FIELD . " = ?";
+        $params = [$this->id];
+
+        foreach (static::$editable_fields as $field) {
+            $key = self::FIELD_PREFIX_US . $field;
+            
+            if (array_key_exists($key, $v)) {
+                $sql .= ", $key = ?";
+                $params[] = $v[$key];
+            }
+        }
+
+        $sql .= " WHERE " . self::FIELD_PREFIX_US . self::KEY_FIELD . " = ?";
+        $params[] = $this->id;
+        
+        DB::query($sql, $params);
+        $this->update();
+    }
+    
+    public function setPassword ($password) {
+        $password = trim($password);
+        
+        if (empty($password)) {
+            return false;
+        }
+        
+        $salt = generateCode();
+        $passwd = md5($salt . md5($password) . $salt);
+        
+        $this->edit([
+            "user_salt" => $salt,
+            "user_password" => $passwd
+        ]);
+        
+        return true;
+    }
+
+    /**
+     * @param array $v
+     * @param bool $count
+     * @return User[]
+     */
+    public static function search ($v = [], $count = false) {
+        $def_sorting = [["id", "ASC"]];
+        $numeric_fields = ["birthdate", "qualification_id", "deleted", "privacy_policy", "promo", "newsletter", "is_admin"];
+        $string_fields = ["type", "firstname", "lastname", "company_name", "company_sdi_code", "company_pec", "company_vat_number", "fiscal_code", "email", "salt", "password", "activation_code", "password_recovery_code"];
+
+        $custom_fields = [];
+        $custom_params = [];
+
+        $custom_join = null;
+        $custom_select = null;
+        
+        return parent::_search(get_class(), $v, $count, $def_sorting, $numeric_fields, $string_fields, $custom_fields, $custom_params, $custom_join, $custom_select);
+    }
+
+    
+    
+    
+    
+    
     /**
      * Return array with names of the 'type' elements
      */
