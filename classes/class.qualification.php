@@ -12,11 +12,13 @@ class Qualification extends Entity {
     // Static property
     static $instances = [];        // array of instances
     static $editable_fields = [
+        "uuid",
         "title"
     ];
 
     // Public properties
     public $id;
+    public $uuid;
     public $title;
     
     // Magic methods
@@ -33,6 +35,43 @@ class Qualification extends Entity {
     }
 
     /**
+     * @return Qualification
+     */
+    public static function findInstance($id, $data = null) {
+        return parent::findClassInstance(get_class(), [self::FIELD_PREFIX_US . self::KEY_FIELD => $id], $data);
+    }
+    
+    public static function getByUuid ($uuid) {
+        return collectionGetValue(self::search([
+            "qualification_uuid" => $uuid
+        ]), 0, null);
+    }
+    
+    public static function resolve ($item) {
+        if (empty($item)) {
+            return null;
+        }
+        
+        if (is_object($item) && is_a($item, get_class())) {
+            return $item;
+        }
+        
+        if (is_scalar($item)) {
+            $item = trim($item);
+            
+            if (is_numeric($item)) {
+                return self::findInstance($item);
+            }
+            
+            if (is_string($item)) {
+                return self::getByUuid($item);
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * @param array $v
      * @param bool $count
      * @return Qualification[]
@@ -40,7 +79,7 @@ class Qualification extends Entity {
     public static function search($v = [], $count = false) {
         $def_sorting = [["id", "ASC"]];
         $numeric_fields = [];
-        $string_fields = ["title"];
+        $string_fields = ["uuid", "title"];
 
         $custom_fields = [];
         $custom_params = [];

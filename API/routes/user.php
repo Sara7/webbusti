@@ -1,22 +1,19 @@
 <?php
 
-/* @var $pdo \DataAccess\Dao\SQLPdo */
+/* @var $app Slim\App */
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
-require_once "./utilities/utilities.users.php";
-//    require_once "./utilities/utilities.qualifications.php";
-
-$app->get("/user/{id}", function(Request $req, Response $res) use ($pdo) {
+$app->get("/user/{id}", function(Request $req, Response $res) {
     $route = $req->getAttribute('route');
     $user_id = $route->getArgument('id');
 
-    $user = $pdo->select("user", ["user_id" => $user_id])[0];
+    $user = User::getByUuid($user_id);
 
     return $res->withJson($user);
 });
 
-$app->post("/user/add", function(Request $req, Response $res) use ($pdo) {
+$app->post("/user/add", function(Request $req, Response $res) {
     $user = $req->getParsedBody();
     $user_info = [];
 
@@ -29,16 +26,17 @@ $app->post("/user/add", function(Request $req, Response $res) use ($pdo) {
 
     $type = trim(collectionGetValue($user, "user_type"));
 
-    if (!array_key_exists("user_type", $user) || !in_array($type, UserUtils::getTypeEnum($pdo))) {
-        $response = $res->withJson(["user_type"]);
-        return $response->withStatus(400, "User type unknown!");
+    if (empty($type) || !in_array($type, User::getEnums("user_type"))) {
+        $response = $res->withJson([
+            "user_type" => "Tipo non riconosciuto!"
+        ]);
+        return $response->withStatus(400);
     }
 
     $errors = [];
-    $text = "The highlighted fields are mandatory or contain errors. Please check and retry!";
 
     switch ($type) {
-        case "business":
+        case User::TYPE_BUSINESS:
             $company_name = collectionGetValue($user, "user_company_name");
             $company_pec = collectionGetValue($user, "user_company_pec");
             $company_sdi_code = collectionGetValue($user, "user_company_sdi_code");
@@ -46,13 +44,15 @@ $app->post("/user/add", function(Request $req, Response $res) use ($pdo) {
 
             switch (true) {
                 case empty($company_name):
-                    $errors[] = "user_company_name";
+                    $errors["user_company_name"] = "Il nome dell'attività è obbligatorio!";
                 case empty($company_pec):
-                    $errors[] = "user_company_pec";
-                case empty($company_sdi_code) || strpos($company_pec, "@") === false:
-                    $errors[] = "user_company_sdi_code";
+                    $errors["user_company_pec"] = "L'indirizzo PEC è obbligatorio!";
+                case strpos($company_pec, "@") === false:
+                    $errors["user_company_pec"] = "L'indirizzo PEC non è corretto!";
+                case empty($company_sdi_code):
+                    $errors["user_company_sdi_code"] = "Il codice SDI è obbligatorio!";
                 case empty($company_vat_number) || !in_array(strlen($company_vat_number), [16, 18]):
-                    $errors[] = "user_company_vat_number";
+                    $errors["user_company_vat_number"] = "La partita IVA è obbligatoria!";
             }
 
             $firstname = null;
@@ -60,7 +60,7 @@ $app->post("/user/add", function(Request $req, Response $res) use ($pdo) {
             $birthdate = null;
             $qualification_id = null;
             break;
-        case "private":
+        case User::TYPE_PRIVATE:
             $firstname = collectionGetValue($user, "user_firstname");
             $lastname = collectionGetValue($user, "user_lastname");
             $birthdate = collectionGetValue($user, "user_birthdate");
@@ -68,26 +68,26 @@ $app->post("/user/add", function(Request $req, Response $res) use ($pdo) {
 
             switch (true) {
                 case empty($firstname):
-                    $errors[] = "user_firstname";
+                    $errors["user_firstname"] = "Il nome è obbligatorio!";
                 case empty($lastname):
-                    $errors[] = "user_lastname";
+                    $errors["user_lastname"] = "Il cognome è obbligatorio!";
             }
 
             if (!empty($birthdate)) {
                 try {
                     $birthdate = new DateTime($birthdate);
                 } catch (Exception $ex) {
-                    $errors[] = "user_birthdate";
+                    $errors["user_birthdate"] = "La data di nascita non è corretta!";
                 }
             }
 
             if (!empty($qualification_id)) {
                 //TBI: Verificare l'esistenza della qualification
-//                    $qualification = QualificationUtils::getById($qualification_id);
-//                    
-//                    if (is_null($qualification)) {
-//                        $errors[] = "user_qualification_id";
-//                    }
+                $qualification = Qualification::resolve($qualification_id);
+                    
+                if (is_null($qualification)) {
+                    $errors["user_qualification_id"] = "Il titolo di studio non è stato riconosciuto!";
+                }
             }
 
             $company_name = null;
