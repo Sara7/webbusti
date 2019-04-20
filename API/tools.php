@@ -1,5 +1,23 @@
 <?php
 
+function classAutoLoad($classname) {
+    $classname = strtolower($classname);
+    $parts = explode("_", $classname);
+    $class = array_pop($parts);
+    $directory = realpath(dirname(__FILE__) . "/../classes");
+    $inner_path = implode("/", $parts);
+
+    if ($inner_path != "") {
+        $inner_path .= "/";
+    }
+
+    $full_path = realpath($directory . "/" . $inner_path . "class.$class.php");
+
+    if (is_file($full_path)) {
+        require_once($full_path);
+    }
+}
+
 /**
  * Return the value of the given key in the given collection or [].
  * 
