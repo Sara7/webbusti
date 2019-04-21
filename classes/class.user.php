@@ -78,6 +78,80 @@ class User extends Entity {
         self::$instances = [];
     }
     
+    public static function createBusiness ($company_name, $company_sdi_code, $company_pec, $company_vat_number, $fiscal_code, $email, $privacy_policy, $promo, $newsletter) {
+        $uuid = generateCode();
+        $activation_code = generateCode(6);
+        
+        $sql = "INSERT INTO " . self::TABLE_NAME . " (
+    user_id,
+    user_uuid,
+    user_type,
+    user_company_name,
+    user_company_sdi_code,
+    user_company_pec,
+    user_company_vat_number,
+    user_fiscal_code,
+    user_email,
+    user_privacy_policy,
+    user_promo,
+    user_newsletter,
+    user_activation_code
+) VALUES (NULL, ?, 'business', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $params = [
+            $uuid,
+            $company_name,
+            $company_sdi_code,
+            $company_pec,
+            $company_vat_number,
+            $fiscal_code,
+            $email,
+            (int)!!$privacy_policy,
+            (int)!!$promo,
+            (int)!!$newsletter,
+            $activation_code
+        ];
+        
+        $id = DB::queryLastId($sql, $params);
+        
+        return $id;
+    }
+    
+    public static function createPrivate ($firstname, $lastname, $birthdate, $qualification_id, $email, $privacy_policy, $promo, $newsletter) {
+        $uuid = generateCode();
+        $activation_code = generateCode(6);
+        
+        $sql = "INSERT INTO " . self::TABLE_NAME . " (
+    user_id,
+    user_uuid,
+    user_type,
+    user_firstname,
+    user_lastname,
+    user_birthdate,
+    user_qualification_id,
+    user_email,
+    user_privacy_policy,
+    user_promo,
+    user_newsletter,
+    user_activation_code
+) VALUES (NULL, ?, 'private', ?, ?, ?, ? ,?, ?, ?, ?, ?)";
+        $params = [
+            $uuid,
+            $firstname,
+            $lastname,
+            $birthdate,
+            $qualification_id,
+            $email,
+            (int)!!$privacy_policy,
+            (int)!!$promo,
+            (int)!!$newsletter,
+            $activation_code
+        ];
+        
+        $id = DB::queryLastId($sql, $params);
+        
+        return $id;
+    }
+    
     public function edit ($v = []) {
         $sql = "UPDATE " . self::TABLE_NAME . " SET " . self::FIELD_PREFIX_US . self::KEY_FIELD . " = ?";
         $params = [$this->id];
@@ -137,6 +211,32 @@ class User extends Entity {
         }
         
         return null;
+    }
+    
+    public function setDeleted () {
+        $edits = [
+            "user_firstname" => null,
+            "user_lastname" => null,
+            "user_company_name" => null,
+            "user_company_sdi_code" => null,
+            "user_company_pec" => null,
+            "user_company_vat_number" => null,
+            "user_fiscal_code" => null,
+            "user_birthdate" => null,
+            "user_qualification_id" => null,
+            "user_email" => generateCode(6) . "@" . generateCode(6) . "." . generateCode(2),
+            "user_salt" => generateCode(),
+            "user_password" => generateCode(),
+            "user_deleted" => 1,
+            "user_privacy_policy" => 0,
+            "user_promo" => 0,
+            "user_newsletter" => 0,
+            "user_activation_code" => null,
+            "user_password_recovery_code" => null,
+            "user_is_admin" => 0
+        ];
+        
+        $this->edit($edits);
     }
     
     public function setPassword ($password) {
