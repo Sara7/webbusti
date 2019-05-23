@@ -1,0 +1,61 @@
+<mjml>
+  <mj-body background-color="#f8f8f8">
+    <mj-section background-color="#ffffff" padding-bottom="0px" padding-top="0">
+      <mj-column vertical-align="top" width="100%">
+        <mj-image src="http://www.web-columbus.it/bustistore/test/assets/img/logo.png" align="center" width="120px" padding-left="0px" padding-right="0px" padding-bottom="24px" padding-top="35px" href="https://www.bustistore.it"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#004a99" vertical-align="top" padding-bottom="0px" padding-top="0">
+      <mj-column vertical-align="top" width="100%">
+        <mj-text align="center" color="#ffd241" font-size="24px" font-weight="lighter" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="0" padding-right="0" padding-bottom="40px" padding-top="40px">Abbiamo Spedito il tuo Ordine</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#004a99" padding-bottom="40px" padding-top="0px">
+      <mj-column vertical-align="middle" width="100%">
+
+        <mj-text align="center" color="#ffffff" font-size="16px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">L'ordine con id <span style="color:#FFD241">{{order_id}}</span> è stato spedito all'indirizzo <span style="color:#FFD241">{{user_address}}</span>.</mj-text>
+
+        <mj-text align="center" color="#ffffff" font-size="16px" font-family="open Sans Helvetica, Arial, sans-serif" font-weight="100" padding-left="25px" padding-right="25px">Puoi controllare gli spostamenti della tua merce tracciando il pacco {{vector.name}} con id {{vector.shipping_id}}.</mj-text>
+       
+        <mj-button align="center" font-size="16px" font-weight="bold" background-color="#FFD241" border-radius="10px" border="2px solid rgba(0,0,0,.3)" color="#004a99" font-family="open Sans Helvetica, Arial, sans-serif" href="https://www.caseificiobusti.app/">SEGUI IL TUO PACCO</mj-button>
+
+      </mj-column>
+    </mj-section>
+
+
+    <mj-section padding-bottom="0px" padding-top="30px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="center" color="#004a99" font-size="22px" font-style="italic" font-weight="100">
+          Seguici sui nostri social
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0">
+      <mj-column>
+        <mj-social font-size="15px" icon-size="30px" mode="horizontal">
+          <mj-social-element name="facebook" href="https://www.facebook.com/ilCaseificioBusti/">
+
+          </mj-social-element>
+          <mj-social-element name="instagram" href="https://www.instagram.com/caseificiobusti/">
+
+          </mj-social-element>
+          <mj-social-element name="twitter" href="https://twitter.com/caseificiobusti">
+
+          </mj-social-element>
+        </mj-social>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0">
+      <mj-column>
+        <mj-text align="center" color="grey" font-size="11px" font-weight="100" line-height="16px">
+          Questa mail è stata inviata automaticamente da bustistore.it </br>
+          Copyright © 2019 | Busti Formaggi S.R.L.
+        </mj-text>
+      </mj-column>
+
+    </mj-section>
+  </mj-body>
+</mjml>

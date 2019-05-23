@@ -1,7 +1,0 @@
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type"
-</IfModule>
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [QSA,L]

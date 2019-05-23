@@ -1,0 +1,50 @@
+version: '3.4'
+services:
+    mysql:
+        image: yobasystems/alpine-mariadb
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=busti
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d:ro
+
+    smtp:
+        build: ./docker/smtp
+        volumes:
+            - ./logs/smtp:/var/mail:rw
+
+    php:
+        build: ./docker/php
+        depends_on:
+            - mysql
+        volumes:
+            - ./application:/app:rw
+
+    php-prod:
+        build: ./docker/php
+        depends_on:
+            - mysql
+        environment:
+            - APP_ENV=prod
+        volumes:
+            - ./application:/app:rw
+
+    nginx:
+        build: ./docker/nginx
+        depends_on:
+            - php
+        links:
+            - php:php
+        volumes:
+            - ./application:/app:ro
+        ports:
+            - "127.0.0.102:80:80"
+
+    pma:
+        image: phpmyadmin/phpmyadmin:latest
+        environment:
+            - PMA_HOST=mysql
+            - PMA_USER=root
+            - PMA_PASSWORD=root
+        ports:
+            - "127.0.0.102:81:80"

@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    OAuth2\GrantType\RefreshToken:
+        arguments:
+            $config:
+                always_issue_new_refresh_token: true
+                refresh_token_lifetime: 2419200
+
+    OAuth2\GrantType\UserCredentials: ~
+
+    OAuth2\Storage\AccessTokenInterface: '@App\OAuth2\Storage'
+
+    OAuth2\Storage\ClientCredentialsInterface: '@App\OAuth2\Storage'
+
+    OAuth2\Storage\RefreshTokenInterface: '@App\OAuth2\Storage'
+
+    OAuth2\Storage\UserCredentialsInterface: '@App\OAuth2\Storage'
+
+    OAuth2\Server:
+        arguments:
+            $storage:
+                - '@App\OAuth2\Storage'
+            $config:
+                access_lifetime: 7200
+            $grantTypes:
+                - '@App\OAuth2\UserCredentialsGrant'
+                - '@OAuth2\GrantType\RefreshToken'

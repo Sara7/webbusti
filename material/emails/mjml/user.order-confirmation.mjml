@@ -1,0 +1,95 @@
+<mjml>
+  <mj-body background-color="#f8f8f8">
+    <mj-section background-color="#ffffff" padding-bottom="0px" padding-top="0">
+      <mj-column vertical-align="top" width="100%">
+        <mj-image src="http://www.web-columbus.it/bustistore/test/assets/img/logo.png" align="center" width="120px" padding-left="0px" padding-right="0px" padding-bottom="24px" padding-top="35px" href="https://www.bustistore.it"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#004a99" vertical-align="top" padding-bottom="0px" padding-top="0">
+      <mj-column vertical-align="top" width="100%">
+        <mj-text align="center" color="#ffd241" font-size="24px" font-weight="lighter" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="0" padding-right="0" padding-bottom="40px" padding-top="40px">Conferma Ordine ID {{order_id}}</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#004a99" padding-bottom="0px" padding-top="0px">
+      <mj-column vertical-align="middle" width="100%">
+
+        <mj-text align="left" color="#ffffff" font-size="16px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Gentile cliente, abbiamo preso in carico il tuo ordine con id <span style="color:#FFD241">{{order_id}}</span> come da tua richiesta.</mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-text align="left" color="#ffffff" font-size="16px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Per maggiori informazioni circa il tuo ordine, ti invitiamo ad accedere alla tua area riservata tramite il seguente link.</mj-text>
+
+        <mj-button align="center" font-size="16px" font-weight="bold" background-color="#FFD241" border-radius="10px" border="2px solid rgba(0,0,0,.3)" color="#004a99" font-family="open Sans Helvetica, Arial, sans-serif" href="https://www.web-columbus.it/bustistore/test/">AREA RISERVATA</mj-button>
+
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0" background-color="#004a99">
+    	<mj-column>
+    	<mj-text align="left" color="#FFD241" font-size="20px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Dettaglio Ordine</mj-text>  
+        
+        <mj-divider border-width="2px" border-style="solid" border-color="#FFD241" padding-bottom="0" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#004a99" padding-top="20px" padding-right="20px" padding-left="20px">
+      <mj-column vertical-align="middle" width="30%" background-color="#fff" border-radius="18px">
+        <mj-image align="center" src="https://www.web-columbus.it/webbusti/resources//media/CHS/HMD/FRS/faul.png" />
+      </mj-column>
+      <mj-column vertical-align="middle" width="70%">
+        <mj-text color="#fff">
+          <h2 style="color:#FFD241"> 3x Pecorino lo Scudo di Fauglia</h2>
+          <h3>Formato: 1/6 di Forma</h3>
+          <p>Codice prodotto: FAUL</p>
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%" padding-top="20px" padding-bottom="20px">
+        <mj-divider border-width="1px" border-style="dashed" border-color="#FFF" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0" background-color="#004a99">
+      <mj-column width="100%">
+        <mj-text color="#FFD241">Spese di spedizione: <span style="color:#FFF">5,50 €</span></mj-text>
+        <mj-text align="left" color="#FFD241" font-size="20px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Totale Ordine: <span style="color:#FFF">45,50 €</span></mj-text>
+      </mj-column>
+
+    </mj-section>
+
+
+
+    <mj-section padding-bottom="0px" padding-top="30px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="center" color="#004a99" font-size="22px" font-style="italic" font-weight="100">
+          Seguici sui nostri social
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0">
+      <mj-column>
+        <mj-social font-size="15px" icon-size="30px" mode="horizontal">
+          <mj-social-element name="facebook" href="https://www.facebook.com/ilCaseificioBusti/">
+
+          </mj-social-element>
+          <mj-social-element name="instagram" href="https://www.instagram.com/caseificiobusti/">
+
+          </mj-social-element>
+          <mj-social-element name="twitter" href="https://twitter.com/caseificiobusti">
+
+          </mj-social-element>
+        </mj-social>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="0">
+      <mj-column>
+        <mj-text align="center" color="grey" font-size="11px" font-weight="100" line-height="16px">
+          Questa mail è stata inviata automaticamente da bustistore.it </br>
+          Copyright © 2019 | Busti Formaggi S.R.L.
+        </mj-text>
+      </mj-column>
+
+    </mj-section>
+  </mj-body>
+</mjml>

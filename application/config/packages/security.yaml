@@ -1,0 +1,18 @@
+security:
+    providers:
+        in_memory: { memory: ~ }
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            pattern: ^/
+            anonymous: true
+            guard:
+                authenticators:
+                    - App\Security\OAuth2Authenticator
+            stateless: true
+
+    access_control:
+    # - { path: ^/admin, roles: ROLE_ADMIN }
+    # - { path: ^/profile, roles: ROLE_USER }

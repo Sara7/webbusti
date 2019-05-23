@@ -1,2 +1,5 @@
 .idea/
-DataAccess/Config/init\.php
+dist/
+logs/smtp/
+!logs/smtp/.gitignore
+.DS_Store
